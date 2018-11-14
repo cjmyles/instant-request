@@ -1,6 +1,7 @@
 import HttpStatusCodes from 'http-status-codes';
 import warning from 'warning';
 import nodeFetch from 'node-fetch';
+import queryString from 'query-string';
 
 const fetch = fetch || nodeFetch;
 
@@ -59,8 +60,12 @@ export default class Request {
     }
   }
 
-  getUrl(uri) {
-    return `${this.baseUrl}${uri}`;
+  getUrl(uri, query) {
+    let url = `${this.baseUrl}${uri}`;
+    if (query) {
+      url += `?${queryString.stringify(query)}`;
+    }
+    return url;
   }
 
   async fetch(method, url, data) {
@@ -76,9 +81,9 @@ export default class Request {
     return await response.json();
   }
 
-  async get(uri) {
+  async get(uri, query) {
     try {
-      const url = this.getUrl(uri);
+      const url = this.getUrl(uri, query);
       this.logRequest('GET', url);
       return await this.fetch('GET', url);
     } catch (error) {
@@ -86,9 +91,9 @@ export default class Request {
     }
   }
 
-  async post(uri, data) {
+  async post(uri, data, query) {
     try {
-      const url = this.getUrl(uri);
+      const url = this.getUrl(uri, query);
       this.logRequest('POST', url, data);
       return await this.fetch('POST', url, data);
     } catch (error) {
@@ -96,9 +101,9 @@ export default class Request {
     }
   }
 
-  async put(uri, data) {
+  async put(uri, data, query) {
     try {
-      const url = this.getUrl(uri);
+      const url = this.getUrl(uri, query);
       this.logRequest('POST', url, data);
       return await this.fetch('PUT', url, data);
     } catch (error) {
@@ -106,9 +111,9 @@ export default class Request {
     }
   }
 
-  async remove(uri) {
+  async remove(uri, query) {
     try {
-      const url = this.getUrl(uri);
+      const url = this.getUrl(uri, query);
       this.logRequest('DELETE', url);
       return await this.fetch('DELETE', url);
     } catch (error) {
