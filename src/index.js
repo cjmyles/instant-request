@@ -5,7 +5,7 @@ import queryString from 'query-string';
 
 const fetch = fetch || nodeFetch;
 
-const defaultOptions = {
+const config = {
   verbose: false,
   // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   fetch: {
@@ -26,65 +26,75 @@ export default class Request {
     warning(baseUrl, 'Missing baseUrl');
 
     this.baseUrl = baseUrl;
-    this.options = {
-      ...defaultOptions,
+    this.config = {
+      ...config,
       ...options,
     };
   }
 
   static checkStatus(response) {
-    if (response.status === HttpStatusCodes.NO_CONTENT) {
-      return response;
-    } else if (
-      !response.headers.has('Content-Type') ||
-      !response.headers.get('Content-Type').includes('application/json')
-    ) {
-      const error = new Error(`HTTP Error Invalid JSON response`);
+    try {
+      if (response.status === HttpStatusCodes.NO_CONTENT) {
+        return response;
+      } else if (response.status === HttpStatusCodes.NOT_FOUND) {
+        const error = new Error(`HTTP Error Not Found`);
+        throw error;
+      } else if (
+        !response.headers.has('Content-Type') ||
+        !response.headers.get('Content-Type').includes('application/json')
+      ) {
+        const error = new Error(`HTTP Error Invalid JSON response`);
+        throw error;
+      } else if (
+        response.status < HttpStatusCodes.OK ||
+        response.status >= HttpStatusCodes.MULTIPLE_CHOICES
+      ) {
+        const error = new Error(`HTTP Error ${response.statusText}`);
+        error.status = response.statusText;
+        error.response = response;
+        throw error;
+      } else {
+        return response;
+      }
+    } catch (error) {
       throw error;
-    } else if (
-      response.status < HttpStatusCodes.OK ||
-      response.status >= HttpStatusCodes.MULTIPLE_CHOICES
-    ) {
-      const error = new Error(`HTTP Error ${response.statusText}`);
-      error.status = response.statusText;
-      error.response = response;
-      throw error;
-    } else {
-      return response;
     }
   }
 
   logRequest() {
-    if (this.options.verbose) {
+    if (this.config.verbose) {
       console.info(...arguments);
     }
   }
 
   getUrl(uri, query) {
-    let url = `${this.baseUrl}${uri}`;
-    if (query) {
-      url += `?${queryString.stringify(query)}`;
-    }
-    return url;
+    return (
+      `${this.baseUrl}${uri}` +
+      (query ? `?${queryString.stringify(query)}` : '')
+    );
   }
 
   async fetch(method, url, data) {
-    let options = {
-      ...this.options.fetch,
-      method,
-    };
-    if (data) {
-      options.body = JSON.stringify(data);
+    try {
+      let fetchOptions = {
+        ...this.config.fetch,
+        method,
+      };
+      if (data) {
+        fetchOptions.body = JSON.stringify(data);
+      }
+      let response = await fetch(url, fetchOptions);
+      response = await Request.checkStatus(response);
+      return await response.json();
+    } catch (error) {
+      throw error;
     }
-    let response = await fetch(url, options);
-    response = await Request.checkStatus(response);
-    return await response.json();
   }
 
   async get(uri, query) {
     try {
       const url = this.getUrl(uri, query);
-      this.logRequest('GET', url);
+      this.logRequest('GET', url, query);
       return await this.fetch('GET', url);
     } catch (error) {
       throw error;
@@ -94,7 +104,7 @@ export default class Request {
   async post(uri, data, query) {
     try {
       const url = this.getUrl(uri, query);
-      this.logRequest('POST', url, data);
+      this.logRequest('POST', url, data, query);
       return await this.fetch('POST', url, data);
     } catch (error) {
       throw error;
@@ -104,7 +114,7 @@ export default class Request {
   async put(uri, data, query) {
     try {
       const url = this.getUrl(uri, query);
-      this.logRequest('POST', url, data);
+      this.logRequest('POST', url, data, query);
       return await this.fetch('PUT', url, data);
     } catch (error) {
       throw error;
@@ -114,7 +124,7 @@ export default class Request {
   async remove(uri, query) {
     try {
       const url = this.getUrl(uri, query);
-      this.logRequest('DELETE', url);
+      this.logRequest('DELETE', url, query);
       return await this.fetch('DELETE', url);
     } catch (error) {
       throw error;
