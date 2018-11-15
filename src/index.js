@@ -32,13 +32,21 @@ export default class Request {
     };
   }
 
+  static responseError(response) {
+    const error = new Error(
+      `HTTP Error ${response.status} ${response.statusText}`
+    );
+    error.status = response.statusText;
+    error.response = response;
+    return error;
+  }
+
   static checkStatus(response) {
     try {
       if (response.status === HttpStatusCodes.NO_CONTENT) {
         return response;
       } else if (response.status === HttpStatusCodes.NOT_FOUND) {
-        const error = new Error(`HTTP Error Not Found`);
-        throw error;
+        throw Request.responseError(response);
       } else if (
         !response.headers.has('Content-Type') ||
         !response.headers.get('Content-Type').includes('application/json')
@@ -49,10 +57,7 @@ export default class Request {
         response.status < HttpStatusCodes.OK ||
         response.status >= HttpStatusCodes.MULTIPLE_CHOICES
       ) {
-        const error = new Error(`HTTP Error ${response.statusText}`);
-        error.status = response.statusText;
-        error.response = response;
-        throw error;
+        throw Request.responseError(response);
       } else {
         return response;
       }
