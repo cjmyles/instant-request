@@ -7,7 +7,7 @@ const fetch = fetch || nodeFetch;
 
 const config = {
   verbose: true,
-  errorType: 'simple', // 'full'
+  errorType: 'full', // simple, *full
   // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   fetch: {
     // mode: 'cors', // no-cors, cors, *same-origin
@@ -35,12 +35,11 @@ export default class Request {
 
   responseError(response) {
     let error;
+    let text = `HTTP Error ${response.status} ${response.statusText}`;
     if (this.config.errorType === 'simple') {
-      error = `HTTP Error ${response.status} ${response.statusText}`;
+      error = text;
     } else {
-      const error = new Error(
-        `HTTP Error ${response.status} ${response.statusText}`
-      );
+      const error = new Error(text);
       error.status = response.statusText;
       error.response = response;
     }
@@ -48,27 +47,23 @@ export default class Request {
   }
 
   checkStatus(response) {
-    try {
-      if (response.status === HttpStatusCodes.NO_CONTENT) {
-        return response;
-      } else if (response.status === HttpStatusCodes.NOT_FOUND) {
-        throw this.responseError(response);
-      } else if (
-        !response.headers.has('Content-Type') ||
-        !response.headers.get('Content-Type').includes('application/json')
-      ) {
-        const error = new Error(`HTTP Error Invalid JSON response`);
-        throw error;
-      } else if (
-        response.status < HttpStatusCodes.OK ||
-        response.status >= HttpStatusCodes.MULTIPLE_CHOICES
-      ) {
-        throw this.responseError(response);
-      } else {
-        return response;
-      }
-    } catch (error) {
+    if (response.status === HttpStatusCodes.NO_CONTENT) {
+      return response;
+    } else if (response.status === HttpStatusCodes.NOT_FOUND) {
+      throw this.responseError(response);
+    } else if (
+      !response.headers.has('Content-Type') ||
+      !response.headers.get('Content-Type').includes('application/json')
+    ) {
+      const error = new Error(`HTTP Error Invalid JSON response`);
       throw error;
+    } else if (
+      response.status < HttpStatusCodes.OK ||
+      response.status >= HttpStatusCodes.MULTIPLE_CHOICES
+    ) {
+      throw this.responseError(response);
+    } else {
+      return response;
     }
   }
 
