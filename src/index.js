@@ -6,14 +6,15 @@ import queryString from 'query-string';
 const fetch = fetch || nodeFetch;
 
 const config = {
-  verbose: false,
+  verbose: true,
+  errorType: 'simple', // 'full'
   // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   fetch: {
     // mode: 'cors', // no-cors, cors, *same-origin
     // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
     // credentials: 'include',
-    // redirect: "follow", // manual, *follow, error
-    // referrer: "no-referrer", // no-referrer, *client
+    // redirect: 'follow', // manual, *follow, error
+    // referrer: 'no-referrer', // no-referrer, *client
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -32,21 +33,26 @@ export default class Request {
     };
   }
 
-  static responseError(response) {
-    const error = new Error(
-      `HTTP Error ${response.status} ${response.statusText}`
-    );
-    error.status = response.statusText;
-    error.response = response;
+  responseError(response) {
+    let error;
+    if (this.config.errorType === 'simple') {
+      error = `HTTP Error ${response.status} ${response.statusText}`;
+    } else {
+      const error = new Error(
+        `HTTP Error ${response.status} ${response.statusText}`
+      );
+      error.status = response.statusText;
+      error.response = response;
+    }
     return error;
   }
 
-  static checkStatus(response) {
+  checkStatus(response) {
     try {
       if (response.status === HttpStatusCodes.NO_CONTENT) {
         return response;
       } else if (response.status === HttpStatusCodes.NOT_FOUND) {
-        throw Request.responseError(response);
+        throw this.responseError(response);
       } else if (
         !response.headers.has('Content-Type') ||
         !response.headers.get('Content-Type').includes('application/json')
@@ -57,7 +63,7 @@ export default class Request {
         response.status < HttpStatusCodes.OK ||
         response.status >= HttpStatusCodes.MULTIPLE_CHOICES
       ) {
-        throw Request.responseError(response);
+        throw this.responseError(response);
       } else {
         return response;
       }
@@ -89,7 +95,7 @@ export default class Request {
         fetchOptions.body = JSON.stringify(data);
       }
       let response = await fetch(url, fetchOptions);
-      response = await Request.checkStatus(response);
+      response = await this.checkStatus(response);
       return await response.json();
     } catch (error) {
       throw error;
