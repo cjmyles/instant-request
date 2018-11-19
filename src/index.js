@@ -46,27 +46,6 @@ export default class Request {
     return error;
   }
 
-  checkStatus(response) {
-    if (response.status === HttpStatusCodes.NO_CONTENT) {
-      return response;
-    } else if (response.status === HttpStatusCodes.NOT_FOUND) {
-      throw this.responseError(response);
-    } else if (
-      !response.headers.has('Content-Type') ||
-      !response.headers.get('Content-Type').includes('application/json')
-    ) {
-      const error = new Error(`HTTP Error Invalid JSON response`);
-      throw error;
-    } else if (
-      response.status < HttpStatusCodes.OK ||
-      response.status >= HttpStatusCodes.MULTIPLE_CHOICES
-    ) {
-      throw this.responseError(response);
-    } else {
-      return response;
-    }
-  }
-
   logRequest() {
     if (this.config.verbose) {
       console.info(...arguments);
@@ -89,9 +68,24 @@ export default class Request {
       if (data) {
         fetchOptions.body = JSON.stringify(data);
       }
-      let response = await fetch(url, fetchOptions);
-      response = await this.checkStatus(response);
-      return await response.json();
+      const response = await fetch(url, fetchOptions);
+      if (response.status === HttpStatusCodes.NO_CONTENT) {
+        return null;
+      } else if (response.status === HttpStatusCodes.NOT_FOUND) {
+        throw this.responseError(response);
+      } else if (
+        !response.headers.has('Content-Type') ||
+        !response.headers.get('Content-Type').includes('application/json')
+      ) {
+        throw new Error(`HTTP Error Invalid JSON response`);
+      } else if (
+        response.status < HttpStatusCodes.OK ||
+        response.status >= HttpStatusCodes.MULTIPLE_CHOICES
+      ) {
+        throw this.responseError(response);
+      } else {
+        return await response.json();
+      }
     } catch (error) {
       throw error;
     }
