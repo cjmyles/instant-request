@@ -1,7 +1,6 @@
 import HttpStatusCodes from 'http-status-codes';
 import warning from 'warning';
 import nodeFetch from 'node-fetch';
-import queryString from 'query-string';
 
 const fetch = fetch || nodeFetch;
 
@@ -55,7 +54,15 @@ export default class Request {
   getUrl(uri, query) {
     return (
       `${this.baseUrl}${uri}` +
-      (query ? `?${queryString.stringify(query)}` : '')
+      (query
+        ? '?' +
+          Object.keys(query)
+            .reduce((a, k) => {
+              a.push(k + '=' + encodeURIComponent(query[k]));
+              return a;
+            }, [])
+            .join('&')
+        : '')
     );
   }
 
