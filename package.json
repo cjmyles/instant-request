@@ -1,6 +1,6 @@
 {
   "name": "instant-request",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "Fetch wrapper with utility functions",
   "main": "lib/index.js",
   "scripts": {

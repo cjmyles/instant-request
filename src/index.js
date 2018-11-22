@@ -5,7 +5,7 @@ import nodeFetch from 'node-fetch';
 const fetch = fetch || nodeFetch;
 
 const config = {
-  verbose: true,
+  verbose: false,
   errorType: 'full', // simple, *full
   // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
   fetch: {
@@ -45,9 +45,9 @@ export default class Request {
     return error;
   }
 
-  logRequest() {
+  logRequest(method, url) {
     if (this.config.verbose) {
-      console.info(...arguments);
+      console.info(method, url);
     }
   }
 
