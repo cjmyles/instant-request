@@ -1,20 +1,31 @@
-# Instant Request
+# Instant Utils
 
-HTTP request utility class, using fetch or node-fetch depending the environment.
+Client/server agnostic http request library.
 
-## Features
+## Table of Contents
 
-- Request
+- [Installation](#installation)
+- [Usage](#usage)
+- [API](#api)
+  - [Instantiation](#instantiation)
+  - [Get](#get)
+  - [Post](#post)
+  - [Put](#put)
+  - [Remove](#remove)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Installation
 
-You can install this wrapper by running the following in your project:
+You can install this package using npm:
 
 ```bash
 $ npm install instant-request
 ```
 
 ## Usage
+
+Here is a quick example to get you started:
 
 **ES Modules**
 
@@ -23,29 +34,154 @@ import Request from 'instant-request';
 const request = new Request('https://example.com');
 
 const test = async () => {
-  const response = await request.get('/records');
+  const response = await request.get('/api/records'); // => https://example.com/api/records
+  const json = await response.json();
+  console.log(json);
 };
 ```
 
 **CommonJS Modules**
 
 ```javascript
-const { Request } = require('instant-request');
+var Request = require('instant-request').Request;
+var request = new Request('https://example.com');
 
-const test = async () => {
-  const response = await request.get('/records');
-};
+request
+  .get('/api/records') // => https://example.com/api/records
+  .then(function(response) {
+    response.json().then(function(json) {
+      console.log(json);
+    });
+  });
 ```
 
-## Running Tests
+## API
 
-To run the tests, clone the repository and install the dependencies:
+### Instantiation
 
-```bash
-git clone https://github.com/JSJInvestments/instant-request.git
-cd instant-request && npm i
-npm run test
+Create an instance of the Request class.
+
+#### Arguments
+
+`baseUrl (String)`: Base URL for all future requests.
+`options (Object) = {}`: Configuration object
+
+### Returns
+
+`instanceof Request`
+
+#### Example Usage
+
+```js
+const request = new Request('https://example.com');
 ```
+
+### Get
+
+Make an HTTP GET request to the specified URI.
+
+#### Arguments
+
+`uri (String)`: The URI to request, e.g `/api/records`.\
+`query (Object)`: The query object to append to the fully qualified URL, e.g `{ active: 1 }` => `https://example.com/api/records?active=1`.
+
+#### Returns
+
+`Response`
+
+#### Example Usage
+
+```js
+async function getCountries() {
+  // https://example.com/api/countries
+  const response = await request.get('/api/countries');
+  const json = await response.json();
+  return json;
+}
+```
+
+### Post
+
+Make an HTTP POST request to the specified URI.
+
+#### Arguments
+
+`uri (String)`: The URI to request, e.g `/api/records`.\
+`data (Object)`: The data to POST.\
+`query (Object)`: The query object to append to the fully qualified URL, e.g `{ active: 1 }` => `https://example.com/api/records?active=1`.
+
+#### Returns
+
+`Response`
+
+#### Example Usage
+
+```js
+async function createCountries() {
+  // https://example.com/api/countries
+  const response = await request.post('/api/countries', {
+    id: 1,
+    name: 'Australia',
+  });
+  const json = await response.json();
+  return json;
+}
+```
+
+### Put
+
+Make an HTTP PUT request to the specified URI.
+
+#### Arguments
+
+`uri (String)`: The URI to request, e.g `/api/records`.\
+`data (Object)`: The data to PUT.\
+`query (Object)`: The query object to append to the fully qualified URL, e.g `{ active: 1 }` => `https://example.com/api/records?active=1`.
+
+#### Returns
+
+`Response`
+
+#### Example Usage
+
+```js
+async function updateCountry() {
+  // https://example.com/api/countries
+  const response = await request.put('/api/countries/1', {
+    animal: 'Kangaroo',
+  });
+  const json = await response.json();
+  return json;
+}
+```
+
+### Delete
+
+Make an HTTP DELETE request to the specified URI.
+
+#### Arguments
+
+`uri (String)`: The URI to request, e.g `/api/records`.\
+`query (Object)`: The query object to append to the fully qualified URL, e.g `{ active: 1 }` => `https://example.com/api/records?active=1`.
+
+#### Returns
+
+`Response`
+
+#### Example Usage
+
+```js
+async function deleteCountry() {
+  // https://example.com/api/countries
+  const response = await request.delete('/api/countries/1');
+  const json = await response.json();
+  return json;
+}
+```
+
+## Contributing
+
+We'd greatly appreciate any [contribution](CONTRIBUTING.md) you make.
 
 ## License
 
