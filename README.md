@@ -8,10 +8,10 @@ Client/server agnostic http request library.
 - [Usage](#usage)
 - [API](#api)
   - [Instantiation](#instantiation)
-  - [Get](#get)
-  - [Post](#post)
-  - [Put](#put)
-  - [Remove](#remove)
+  - [get](#get)
+  - [post](#post)
+  - [put](#put)
+  - [remove](#remove)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -76,7 +76,7 @@ Create an instance of the Request class.
 const request = new Request('https://example.com');
 ```
 
-### Get
+### get
 
 Make an HTTP GET request to the specified URI.
 
@@ -100,7 +100,7 @@ async function getCountries() {
 }
 ```
 
-### Post
+### post
 
 Make an HTTP POST request to the specified URI.
 
@@ -128,7 +128,7 @@ async function createCountries() {
 }
 ```
 
-### Put
+### put
 
 Make an HTTP PUT request to the specified URI.
 
@@ -155,7 +155,7 @@ async function updateCountry() {
 }
 ```
 
-### Delete
+### delete
 
 Make an HTTP DELETE request to the specified URI.
 
