@@ -1,7 +1,7 @@
 {
   "name": "instant-request",
   "version": "1.0.1",
-  "description": "Client/server agnostic http request library.",
+  "description": "Client/server agnostic Http Request library utilising the `fetch` API.",
   "main": "lib/index.js",
   "scripts": {
     "test": "mocha --require babel-core/register --require babel-polyfill",
@@ -14,7 +14,11 @@
     "url": "git+https://github.com/cjmyles/instant-request.git"
   },
   "keywords": [
-    "javascript"
+    "http",
+    "request",
+    "fetch",
+    "express",
+    "react"
   ],
   "author": "Craig Myles",
   "license": "MIT",

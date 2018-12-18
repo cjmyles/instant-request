@@ -1,6 +1,6 @@
 # Instant Utils
 
-Client/server agnostic http request library.
+Client/server agnostic Http Request library utilising the `fetch` API.
 
 ## Table of Contents
 
